@@ -1,0 +1,84 @@
+name: Deploy Node App (ECR + EC2)
+
+on:
+  push:
+    branches:
+      - main
+
+
+env:
+    AWS_REGION: us-east-1
+    ECR_REPOSITORY: my-node-app
+    IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+    deploy:
+            runs-on: ubuntu-latest
+
+            steps:
+              - name: Checkout código
+                uses: actions/checkout@v4
+
+        # 🔐 Autenticação AWS
+              - name: Configurar credenciais AWS
+                uses: aws-actions/configure-aws-credentials@v4
+                with:
+                    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                    aws-region: ${{ env.AWS_REGION }}
+
+        # 🔑 Login ECR via TOKEN (importante)
+              - name: Login no ECR
+                run: |
+                    aws ecr get-login-password --region $AWS_REGION \
+                    | docker login \
+                    --username AWS \
+                    --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com
+
+        # 🐳 Build da imagem
+              - name: Build Docker
+                run: |
+                    docker build -t $ECR_REPOSITORY .
+
+        # 🏷️ Tag da imagem
+              - name: Tag imagem
+                run: |
+                    docker tag $ECR_REPOSITORY:latest \
+                    ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+        # 📤 Push para ECR
+              - name: Push para ECR
+                run: |
+                    docker push \
+                    ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+
+        # 🚀 Deploy no EC2 via SSH
+              - name: Deploy na EC2
+                uses: appleboy/ssh-action@v1.0.3
+                with:
+                    host: ${{ secrets.EC2_HOST }}
+                    username: ubuntu
+                    key: ${{ secrets.EC2_SSH_KEY }}
+                    script: |
+                        AWS_REGION=${{ env.AWS_REGION }}
+                        ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+                        IMAGE=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+                        # Login ECR via token dentro da EC2
+                        aws ecr get-login-password --region $AWS_REGION \
+                        | docker login \
+                        --username AWS \
+                        --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+                        # Pull da nova imagem
+                        docker pull $IMAGE
+
+                        # Stop container antigo
+                        docker stop my-node-app || true
+                        docker rm my-node-app || true
+
+                        # Subir novo container
+                        docker run -d \
+                        --name my-node-app \
+                        -p 3000:3000 \
+                        $IMAGE
