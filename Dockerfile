@@ -4,11 +4,11 @@ FROM node:18
 # Diretório de trabalho
 WORKDIR /app
 
-# Copia arquivos de dependência
+# Copia apenas package.json e package-lock.json
 COPY package*.json ./
 
-# Instala dependências
-RUN npm install
+# Limpa cache e instala dependências
+RUN npm cache clean --force && npm install
 
 # Copia o restante da aplicação
 COPY . .
