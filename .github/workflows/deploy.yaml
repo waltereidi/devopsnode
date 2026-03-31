@@ -60,7 +60,7 @@ jobs:
                     username: ubuntu
                     key: ${{ secrets.EC2_SSH_KEY }}
                     script: |
-                        AWS_REGION=${{ env.AWS_REGION }}
+                        AWS_REGION= us-east-2
                         ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
                         IMAGE=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
 
