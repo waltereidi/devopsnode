@@ -42,9 +42,10 @@ jobs:
                   docker tag $IMAGE_NAME:latest $ECR_REPOSITORY:latest
 
         # 📤 Push para ECR
-              - name: 🚀 Push para ECR
+              - name: 📦 Definir URI do ECR
                 run: |
-                  docker push $ECR_REPOSITORY:latest
+                  ECR_URI=${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
+                  echo "ECR_URI=$ECR_URI" >> $GITHUB_ENV
 
 
         # 🚀 Deploy no EC2 via SSH
