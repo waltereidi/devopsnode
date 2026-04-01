@@ -51,12 +51,13 @@ jobs:
               - name: 🚀 Deploy via SSH
                 uses: appleboy/ssh-action@v1.0.3
                 with:
-                  host: ${{ secrets.EC2_HOST }}
+                  host: ${{ secrets.EC2_HOST }}   # 👈 OBRIGATÓRIO
                   username: ubuntu
                   key: ${{ secrets.EC2_SSH_KEY }}
                   script: |
                     AWS_REGION=us-east-2
                     ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+
                     IMAGE=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/unimar-pos-fullstack:latest
 
                     echo "🔑 Login no ECR..."
