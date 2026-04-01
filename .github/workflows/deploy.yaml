@@ -48,14 +48,13 @@ jobs:
                   echo "ECR_URI=$ECR_URI" >> $GITHUB_ENV
 
 
-        # 🚀 Deploy no EC2 via SSH
-              - name: Deploy na EC2
+              - name: 🚀 Deploy via SSH
                 uses: appleboy/ssh-action@v1.0.3
                 with:
-                    host: ${{ secrets.EC2_HOST }}
-                    username: ubuntu
-                    key: ${{ secrets.EC2_SSH_KEY }}
-                    script: |
+                  host: ${{ secrets.EC2_HOST }}
+                  username: ubuntu
+                  key: ${{ secrets.EC2_SSH_KEY }}
+                  script: |
                         AWS_REGION= us-east-2
                         ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
                         IMAGE=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
