@@ -42,10 +42,10 @@ jobs:
                   docker tag $IMAGE_NAME:latest $ECR_REPOSITORY:latest
 
         # 📤 Push para ECR
-              - name: Push para ECR
+              - name: 🚀 Push para ECR
                 run: |
-                    docker push \
-                    ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+                  docker push $ECR_REPOSITORY:latest
+
 
         # 🚀 Deploy no EC2 via SSH
               - name: Deploy na EC2
