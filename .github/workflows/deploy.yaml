@@ -55,25 +55,23 @@ jobs:
                   username: ubuntu
                   key: ${{ secrets.EC2_SSH_KEY }}
                   script: |
-                        AWS_REGION= us-east-2
-                        ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
-                        IMAGE=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+                    AWS_REGION=us-east-2
+                    ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+                    IMAGE=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/unimar-pos-fullstack:latest
 
+                    echo "🔑 Login no ECR..."
+                    aws ecr get-login-password --region $AWS_REGION | \
+                    docker login --username AWS --password-stdin ${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
 
-                        echo "🔑 Login no ECR..."
-                        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | \
-                          docker login --username AWS --password-stdin $ECR_URI
+                    echo "📥 Pull da imagem"
+                    docker pull $IMAGE
 
+                    echo "🛑 Parando container antigo"
+                    docker stop my-node-app || true
+                    docker rm my-node-app || true
 
-                        # Pull da nova imagem
-                        docker pull $IMAGE
-
-                        # Stop container antigo
-                        docker stop my-node-app || true
-                        docker rm my-node-app || true
-
-                        # Subir novo container
-                        docker run -d \
-                        --name my-node-app \
-                        -p 3000:3000 \
-                        $IMAGE
+                    echo "🚀 Subindo novo container"
+                    docker run -d \
+                      --name my-node-app \
+                      -p 3000:3000 \
+                      $IMAGE
