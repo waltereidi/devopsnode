@@ -4,14 +4,17 @@ FROM node:18
 # Diretório de trabalho
 WORKDIR /app
 
-# Copia apenas package.json e package-lock.json
+# Copia apenas arquivos de dependência
 COPY package*.json ./
 
-# Limpa cache e instala dependências
-RUN npm cache clean --force && npm install
+# Instala dependências (inclui dev para lint)
+RUN npm install
 
 # Copia o restante da aplicação
 COPY . .
+
+# 🧹 Executa lint (falha o build se houver erro)
+RUN npm run lint
 
 # Expõe a porta
 EXPOSE 3000
