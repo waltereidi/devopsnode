@@ -26,8 +26,8 @@ jobs:
                 with:
                   node-version: 18
 
-              - name: 📦 Instalar dependências
-                run: npm ci
+              - name: 📦 Instalar dependências (incluindo dev)
+                run: npm ci --include=dev
 
               - name: 🔍 Rodar ESLint
                 run: npm run lint
