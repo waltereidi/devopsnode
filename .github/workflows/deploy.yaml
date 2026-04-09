@@ -32,6 +32,9 @@ jobs:
               - name: 🔍 Rodar ESLint
                 run: npm run lint
 
+              - name: 🧪 Rodar testes
+                run: npm test
+
         # 🔐 Autenticação AWS
               - name: Configurar credenciais AWS
                 uses: aws-actions/configure-aws-credentials@v4
